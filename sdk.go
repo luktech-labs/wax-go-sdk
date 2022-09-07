@@ -14,6 +14,8 @@ const (
 	getInfoEndpoint      = "/v1/chain/get_info"
 )
 
+var ErrNoTableRows = errors.New("No table rows found")
+
 type Sdk struct {
 	nodeURL     string
 	httpWrapper httpWrapper
@@ -42,6 +44,10 @@ func (s *Sdk) GetTableRowsContext(ctx context.Context, payload GetTableRowsPaylo
 	err = s.httpWrapper.Post(ctx, url, b, &res)
 	if err != nil {
 		return errors.Wrap(err, "calling post")
+	}
+
+	if len(res.Rows) == 0 {
+		return ErrNoTableRows
 	}
 
 	b, err = json.Marshal(res.Rows)
